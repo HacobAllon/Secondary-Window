@@ -3,6 +3,8 @@
 A floating popout for EuroScope that draws TopSky and Groundradar style polygon maps and
 altitude filtered traffic in a separate, always on top window.
 
+<img width="419" height="419" alt="Screenshot 2026-05-23 at 8 35 18 pm" src="https://github.com/user-attachments/assets/8029c509-3e42-450d-ba1b-cf4961347e5e" />
+
 ---
 
 ## Install
