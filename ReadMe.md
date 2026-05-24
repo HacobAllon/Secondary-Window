@@ -3,8 +3,6 @@
 A floating popout for EuroScope that draws TopSky and Groundradar style polygon maps and
 altitude filtered traffic in a separate, always on top window.
 
-<img width="419" height="419" alt="Screenshot 2026-05-23 at 8 35 18 pm" src="https://github.com/user-attachments/assets/8029c509-3e42-450d-ba1b-cf4961347e5e" />
-
 ---
 
 ## Install
@@ -70,11 +68,11 @@ between shapes.
 
 Three closed/open variants, all the syntax Ground Radar / TopSky use:
 
-| Directive | Behavior |
-|---|---|
-| `COORDTYPE:OTHER:REGION` + `COORD:` lines | **Filled** closed area |
-| `COORDTYPE:OTHER:POLYGON` + `COORD:` lines | **Outline-only** closed shape (last vertex connects to first) |
-| `COORDTYPE:OTHER:POLYLINE` + `COORD:` lines | Open line strip, no closing segment |
+| Directive                                   | Behavior                                                      |
+| ------------------------------------------- | ------------------------------------------------------------- |
+| `COORDTYPE:OTHER:REGION` + `COORD:` lines   | **Filled** closed area                                        |
+| `COORDTYPE:OTHER:POLYGON` + `COORD:` lines  | **Outline-only** closed shape (last vertex connects to first) |
+| `COORDTYPE:OTHER:POLYLINE` + `COORD:` lines | Open line strip, no closing segment                           |
 | ------------------------------------------- | ------------------------------------------------------------- |
 | `COORDTYPE:OTHER:REGION` + `COORD:` lines   | **Filled** closed area                                        |
 | `COORDTYPE:OTHER:POLYGON` + `COORD:` lines  | **Outline-only** closed shape (last vertex connects to first) |
@@ -380,7 +378,7 @@ unknown lines without complaining.
 | `COLORDEF:`       | `Name:R:G:B`             | Defines a named color. R/G/B are 0–255.                                                                                 |
 | `MAP:`            | `display name`           | Starts a new map block; everything below belongs to it until the next `MAP:`                                            |
 | `FOLDER:`         | `name`                   | Optional folder/grouping label (not currently shown in UI but parsed).                                                  |
-| `AIRPORT`:        | `ICAO`                   | Optional metadata; stored, not rendered.                                                                                |
+| `AIRPORT`:        | `ICAO`                   | Optional stored, not rendered (as of now)                                                                               |
 | `ACTIVE:`         | `0` or `1`               | Initial visibility. Default `1` (visible).                                                                              |
 | `COLOR:`          | `name`                   | Sets the active color (must match a prior `COLORDEF`). Applies to all shapes/labels that follow until the next `COLOR:` |
 | `COORDTYPE:`      | `OTHER:REGION`           | Starts a **filled** closed polygon — see `COORD:` lines below. Block ends at next `COORDTYPE:` / `MAP:` / EOF.          |
@@ -391,7 +389,7 @@ unknown lines without complaining.
 | `ENDPOLYGON`      | *(none)*                 | Ends a legacy `POLYGON` block.                                                                                          |
 | `LINE:`           | `lat1:lon1:lat2:lon2`    | One-shot straight segment in current color.                                                                             |
 | `TEXT:`           | `lat:lon:label-text`     | Label at a coord, current color, current size. Label may contain colons.                                                |
-| `TEXT_SIZE:`      | `n`                      | Sticky font size in pixels for following `TEXT:` and ESE labels. `0` = default.                                         |
+| `TEXT_SIZE:`      | `px`                     | Sticky font size in pixels for following `TEXT:` and ESE labels. `0` = default.                                         |
 | `INCLUDE_ESE:`    | `path`                   | Imports labels from a `.ese` files. Path can be relative to the map file or absolute.                                   |
 | *raw line*        | `lat:lon:category:label` | Inline ESE label. Category becomes its own map under folder `ESE`.                                                      |
 | `FILTER_ALT_MIN:` | `feet`                   | Lower bound of traffic-altitude filter. Targets below are hidden. Default: `INT_MIN`.                                   |
@@ -407,22 +405,22 @@ unknown lines without complaining.
 | `TITLE_BAR_COLOR`    | `R:G:B`          | `80:80:80`    | Strip behind the title text.                                                                                          |
 | `TITLE_TEXT_COLOR`   | `R:G:B`          | `220:220:220` |                                                                                                                       |
 | `RESIZE_GRIP_COLOR`  | `R:G:B`          | `140:140:140` |                                                                                                                       |
-| `LINE_WIDTH`         | `n` (px)         | `1`           | Width for lines, polygon outlines, polylines.                                                                         |
+| `LINE_WIDTH`         | `px`             | `1`           | Width for lines, polygon outlines, polylines.                                                                         |
 | `FILL_POLYGONS`      | `true` / `false` | `true`        | `false` makes `REGION` shapes outline-only.                                                                           |
 | `LABEL_FONT_FACE`    | font name        | `Consolas`    | Font for `TEXT:` labels                                                                                               |
-| `LABEL_FONT_SIZE`    | `n` (px)         | `12`          | Default label height. Overridable per section with `TEXT_SIZE:`.                                                      |
+| `LABEL_FONT_SIZE`    | `px`             | `12`          | Default label height. Overridable per section with `TEXT_SIZE:`.                                                      |
 | `LABEL_FONT_BOLD`    | `true` / `false` | `false`       | Bold label text.                                                                                                      |
 | `TRAFFIC_DOT_COLOR`  | `R:G:B`          | `255:255:0`   | Aircraft dot color.                                                                                                   |
-| `TRAFFIC_DOT_RADIUS` | `n` (px)         | `3`           | Width of the square dots.                                                                                             |
+| `TRAFFIC_DOT_RADIUS` | `px`             | `3`           | Width of the square dots.                                                                                             |
 | `SHOW_TAGS`          | `true` / `false` | `true`        | Master switch for callsign labels.                                                                                    |
 | `TAG_COLOR`          | `R:G:B`          | `255:255:0`   | Default tag text color.                                                                                               |
-| `COLOR_DEPARTURE`    | `R:G:B`          | *(unset)*     | Override tag color when the aircraft's origin airport is active for departure in EuroScope.                            |
-| `COLOR_ARRIVAL`      | `R:G:B`          | *(unset)*     | Override tag color when the aircraft's destination airport is active for arrival in EuroScope. Wins over departure.    |
+| `COLOR_DEPARTURE`    | `R:G:B`          | *(unset)*     | Override tag color when the aircraft's origin airport is active for departure in EuroScope.                           |
+| `COLOR_ARRIVAL`      | `R:G:B`          | *(unset)*     | Override tag color when the aircraft's destination airport is active for arrival in EuroScope. Wins over departure.   |
 | `TAG_FONT_FACE`      | font name        | `Consolas`    | Tag font.                                                                                                             |
-| `TAG_FONT_SIZE`      | `n` (px)         | `12`          | Tag font height.                                                                                                      |
+| `TAG_FONT_SIZE`      | `px`             | `12`          | Tag font size.                                                                                                        |
 | `TAG_FONT_BOLD`      | `true` / `false` | `false`       | Bold tag text.                                                                                                        |
-| `TAG_OFFSET_X`       | `n` (px)         | `5`           | Default horizontal offset of tag from the dot. Per-aircraft offset wins once a tag is dragged.                        |
-| `TAG_OFFSET_Y`       | `n` (px)         | `-3`          | Default vertical offset (negative = above the dot).                                                                   |
+| `TAG_OFFSET_X`       | `px`             | `5`           | Default horizontal offset of tag from the dot. Per-aircraft offset wins once a tag is dragged.                        |
+| `TAG_OFFSET_Y`       | `px`             | `-3`          | Default vertical offset (negative = above the dot).                                                                   |
 | `TAG_LINE`           | format string    | —             | Adds one line to every tag. Repeat for multiple lines. Supports `{placeholder}`. See the *Tag content* section above. |
 
 ---
