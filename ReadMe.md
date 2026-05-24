@@ -20,10 +20,10 @@ altitude filtered traffic in a separate, always on top window.
 
 ## File layout
 
-| File                          | Purpose                                                                                   |
-| ----------------------------- | ----------------------------------------------------------------------------------------- |
-| `SecondaryWindowMap.txt`      | Map definitions: colors, polygons, lines, polylines, labels. Altitude filter for traffic. |
-| `SecondaryWindowSettings.txt` | Visual tuning: background, dots, fonts, tag format.                                       |
+| File                          | Purpose                                                      |
+| ----------------------------- | ------------------------------------------------------------ |
+| `SecondaryWindowMap.txt`      | Map definitions: colors, polygons, lines, polylines, labels. |
+| `SecondaryWindowSettings.txt` | Visual settings: background, dots, fonts, tag format.        |
 
 ### Commands
 
@@ -39,7 +39,7 @@ elsewhere.
 
 Plain text. Each line is a directive: `KEY:value...`. 
 Coordinates use TopSky format: `hemisphere + DDD.MM.SS.fff`,
-e.g. `N014.30.00.000` or `E121.05.29.662`.
+e.g. `N014.30.00.000`
 
 ### Colors
 
@@ -71,11 +71,11 @@ Three closed/open variants, all the syntax Ground Radar / TopSky use:
 | Directive                                   | Behavior                                                      |
 | ------------------------------------------- | ------------------------------------------------------------- |
 | `COORDTYPE:OTHER:REGION` + `COORD:` lines   | **Filled** closed area                                        |
-| `COORDTYPE:OTHER:POLYGON` + `COORD:` lines  | **Outline-only** closed shape (last vertex connects to first) |
+| `COORDTYPE:OTHER:POLYGON` + `COORD:` lines  | **Outline only** closed shape (last vertex connects to first) |
 | `COORDTYPE:OTHER:POLYLINE` + `COORD:` lines | Open line strip, no closing segment                           |
 | ------------------------------------------- | ------------------------------------------------------------- |
 | `COORDTYPE:OTHER:REGION` + `COORD:` lines   | **Filled** closed area                                        |
-| `COORDTYPE:OTHER:POLYGON` + `COORD:` lines  | **Outline-only** closed shape (last vertex connects to first) |
+| `COORDTYPE:OTHER:POLYGON` + `COORD:` lines  | **Outline only** closed shape (last vertex connects to first) |
 | `COORDTYPE:OTHER:POLYLINE` + `COORD:` lines | Open line strip, no closing segment                           |
 
 Each shape ends at the next `COORDTYPE:`, `MAP:`, or end of file.
@@ -156,7 +156,6 @@ EuroScope `.ese` label format is `lat:lon:category:label`, e.g.
 
 ```
 N014.30.53.908:E121.00.32.721:RPLL BAYS-GroundLayout:61
-N014.27.15.000:E120.55.01.000:RPLL HELI RPT_PTS:Binakayan
 N014.31.10.449:E121.00.44.997:RPLL BAYS-GroundLayout:115
 ```
 
@@ -184,13 +183,6 @@ N014.31.10.449:E121.00.44.997:RPLL BAYS-GroundLayout:115
 TEXT_SIZE:0      // reset to default
 ```
 
-### Traffic altitude filter
-
-```
-FILTER_ALT_MIN:0
-FILTER_ALT_MAX:24000
-```
-
 ---
 
 ## Settings file (`SecondaryWindowSettings.txt`)
@@ -208,12 +200,9 @@ BACKGROUND_COLOR:0:0:0       // R:G:B of the map area
 All R:G:B. Omit any line to keep the built-in default.
 
 ```
-BORDER_COLOR:40:40:40          // x outline around the window
-TITLE_BAR_COLOR:80:80:80       // strip behind the title
+BORDER_COLOR:40:40:40          // Outline around the window
+TITLE_BAR_COLOR:80:80:80       // Title Bar
 TITLE_TEXT_COLOR:220:220:220   // "Secondary Window" text
-CLOSE_ICON_COLOR:220:220:220   // X icon in the top-right
-RESIZE_GRIP_BG:60:60:60        // bottom-right grip square fill
-RESIZE_GRIP_COLOR:140:140:140  // diagonal hatch on the grip
 ```
 
 ### Map rendering
@@ -373,27 +362,25 @@ unknown lines without complaining.
 
 ### `SecondaryWindowMap.txt`
 
-| Key               | Value                    | Remarks                                                                                                                 |
-| ----------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `COLORDEF:`       | `Name:R:G:B`             | Defines a named color. R/G/B are 0–255.                                                                                 |
-| `MAP:`            | `display name`           | Starts a new map block; everything below belongs to it until the next `MAP:`                                            |
-| `FOLDER:`         | `name`                   | Optional folder/grouping label (not currently shown in UI but parsed).                                                  |
-| `AIRPORT`:        | `ICAO`                   | Optional stored, not rendered (as of now)                                                                               |
-| `ACTIVE:`         | `0` or `1`               | Initial visibility. Default `1` (visible).                                                                              |
-| `COLOR:`          | `name`                   | Sets the active color (must match a prior `COLORDEF`). Applies to all shapes/labels that follow until the next `COLOR:` |
-| `COORDTYPE:`      | `OTHER:REGION`           | Starts a **filled** closed polygon — see `COORD:` lines below. Block ends at next `COORDTYPE:` / `MAP:` / EOF.          |
-| `COORDTYPE:`      | `OTHER:POLYGON`          | Starts an **outline only** closed shape. Last vertex auto connects to the first.                                        |
-| `COORDTYPE:`      | `OTHER:POLYLINE`         | Starts an **open** line strip (no closing segment).                                                                     |
-| `COORD:`          | `lat:lon`                | Adds a vertex to the active polygon / polyline. Lat/lon in DMS format (`N014.30.00.000` etc.).                          |
-| `POLYGON`         | *(none)*                 | Legacy alias for `COORDTYPE:OTHER:REGION`. Closed by an `ENDPOLYGON` line.                                              |
-| `ENDPOLYGON`      | *(none)*                 | Ends a legacy `POLYGON` block.                                                                                          |
-| `LINE:`           | `lat1:lon1:lat2:lon2`    | One-shot straight segment in current color.                                                                             |
-| `TEXT:`           | `lat:lon:label-text`     | Label at a coord, current color, current size. Label may contain colons.                                                |
-| `TEXT_SIZE:`      | `px`                     | Sticky font size in pixels for following `TEXT:` and ESE labels. `0` = default.                                         |
-| `INCLUDE_ESE:`    | `path`                   | Imports labels from a `.ese` files. Path can be relative to the map file or absolute.                                   |
-| *raw line*        | `lat:lon:category:label` | Inline ESE label. Category becomes its own map under folder `ESE`.                                                      |
-| `FILTER_ALT_MIN:` | `feet`                   | Lower bound of traffic-altitude filter. Targets below are hidden. Default: `INT_MIN`.                                   |
-| `FILTER_ALT_MAX:` | `feet`                   | Upper bound of traffic-altitude filter. Targets above are hidden. Default: `INT_MAX`.                                   |
+| Key            | Value                    | Remarks                                                                                                                 |
+| -------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `COLORDEF:`    | `Name:R:G:B`             | Defines a named color. R/G/B are 0–255.                                                                                 |
+| `MAP:`         | `display name`           | Starts a new map block; everything below belongs to it until the next `MAP:`                                            |
+| `FOLDER:`      | `name`                   | Optional folder/grouping label (not currently shown in UI but parsed).                                                  |
+| `AIRPORT`:     | `ICAO`                   | Optional stored, not rendered (as of now)                                                                               |
+| `ACTIVE:`      | `0` or `1`               | Initial visibility. Default `1` (visible).                                                                              |
+| `COLOR:`       | `name`                   | Sets the active color (must match a prior `COLORDEF`). Applies to all shapes/labels that follow until the next `COLOR:` |
+| `COORDTYPE:`   | `OTHER:REGION`           | Starts a **filled** closed polygon — see `COORD:` lines below. Block ends at next `COORDTYPE:` / `MAP:` / EOF.          |
+| `COORDTYPE:`   | `OTHER:POLYGON`          | Starts an **outline only** closed shape. Last vertex auto connects to the first.                                        |
+| `COORDTYPE:`   | `OTHER:POLYLINE`         | Starts an **open** line strip (no closing segment).                                                                     |
+| `COORD:`       | `lat:lon`                | Adds a vertex to the active polygon / polyline. Lat/lon in DMS format (`N014.30.00.000` etc.).                          |
+| `POLYGON`      | *(none)*                 | Legacy alias for `COORDTYPE:OTHER:REGION`. Closed by an `ENDPOLYGON` line.                                              |
+| `ENDPOLYGON`   | *(none)*                 | Ends a legacy `POLYGON` block.                                                                                          |
+| `LINE:`        | `lat1:lon1:lat2:lon2`    | One-shot straight segment in current color.                                                                             |
+| `TEXT:`        | `lat:lon:label-text`     | Label at a coord, current color, current size. Label may contain colons.                                                |
+| `TEXT_SIZE:`   | `px`                     | Sticky font size in pixels for following `TEXT:` and ESE labels. `0` = default.                                         |
+| `INCLUDE_ESE:` | `path`                   | Imports labels from a `.ese` files. Path can be relative to the map file or absolute.                                   |
+| *raw line*     | `lat:lon:category:label` | Inline ESE label. Category becomes its own map under folder `ESE`.                                                      |
 
 ### `SecondaryWindowSettings.txt`
 
