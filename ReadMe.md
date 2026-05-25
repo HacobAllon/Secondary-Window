@@ -20,10 +20,11 @@ altitude filtered traffic in a separate, always on top window.
 
 ## File layout
 
-| File                          | Purpose                                                      |
-| ----------------------------- | ------------------------------------------------------------ |
-| `SecondaryWindowMap.txt`      | Map definitions: colors, polygons, lines, polylines, labels. |
-| `SecondaryWindowSettings.txt` | Visual settings: background, dots, fonts, tag format.        |
+| File                          | Purpose                                                                 |
+| ----------------------------- | ----------------------------------------------------------------------- |
+| `SecondaryWindowMap.txt`      | Map definitions: colors, polygons, lines, polylines, labels.            |
+| `SecondaryWindowSettings.txt` | Visual settings: background, dots, fonts, tag format, `SCT_FILE:`, etc. |
+| `SecondaryWindowState.txt`    | Auto-saved window state: positions, sizes, view, per-window map visibility, altitude filter. Re-applied at startup. Safe to delete to reset. |
 
 ### Commands
 
@@ -296,12 +297,17 @@ LABEL_FONT_SIZE:12             // pixel height
 LABEL_FONT_BOLD:false
 ```
 
-### Traffic dots
+### Traffic dots + trails
 
 ```
 TRAFFIC_DOT_COLOR:255:255:0    // dot color
 TRAFFIC_DOT_RADIUS:3           // px (half-width of the square dot)
+TRAFFIC_TRAIL_LENGTH:5         // number of historical positions to draw (0 = off)
 ```
+
+The trail is a row of dots behind each aircraft, same size and color as the
+main dot. The plugin records each target's last `TRAFFIC_TRAIL_LENGTH`
+positions and renders them every frame. Set to `0` to disable.
 
 ### Tags (labels next to each dot)
 
@@ -412,20 +418,139 @@ TAG_LINE:{rwy} {sid}
 
 ---
 
+## Multiple Secondary Windows
+
+Up to **5** Secondary Windows can be open at once. Each has its own
+position, size, view (pan/zoom), altitude filter, and **per-window** map
+visibility — so you can have one window showing the ground layout for a
+particular airport and another showing the TMA, without affecting either.
+
+| How to open another | What you get |
+| ------------------- | ------------ |
+| Right-click → **Open new Secondary Window** | New window starts **with all maps hidden** so you can pick exactly what to show. |
+| `.sw new` chat command | Same as above. |
+
+The first window at plugin load seeds its visibility from the `ACTIVE:`
+flags in the map file (and from any saved `HIDE:` lines in
+`SecondaryWindowState.txt`). New windows opened during the session start
+blank by design — opening a new window almost always means "I want a
+different view," not "show me everything again."
+
+---
+
+## Loading from EuroScope `.asr` files
+
+Right-click any Secondary Window → **Load .asr...** opens a Windows file
+picker. Pick any EuroScope `.asr` and the window's visible-map set is
+replaced with whatever that `.asr` had on:
+
+- Maps mentioned in the `.asr` and *also* loaded in our `MapCollection`
+  → become visible in this window
+- Anything else → hidden in this window
+
+The window then refits its view to fit the new selection. Other windows
+are untouched — each window can load a different `.asr`.
+
+The plugin recognises these `.asr` section prefixes (case-insensitive):
+
+```
+ARTCC boundary:        ARTCC high boundary:        ARTCC low boundary:
+ARTCC:                 ARTCC high:                 ARTCC low:
+Airports:              Fixes:                      Free Text:
+Geo:                   Regions:                    Runways:
+Sids:                  Stars:
+VORs:                  NDBs:
+Low airway:            High airway:
+```
+
+Lines from any other prefix (display config, plugin properties, window
+position, etc.) are ignored.
+
+**Name matching:** the second `:`-separated field of each line is the map
+name. `Free Text:` entries strip everything after the first backslash
+(so `Free Text:RPLL TWY-GroundLayout\C:freetext` matches a map named
+`RPLL TWY-GroundLayout`). Comparison is case-insensitive.
+
+**Diagnostics:** the chat tells you how many of the `.asr`'s names ended
+up matching loaded maps, and lists any unmatched names so you can spot
+missing `.sct` / `.ese` imports:
+
+```
+ASR loaded: 12/47 maps visible  (18 unique names in .asr) - C:\...\foo.asr
+  6 name(s) in .asr had no matching loaded map:
+    rpll bays-groundlayout, rpll groundlayout, ...
+```
+
+---
+
+## Window state persistence (`SecondaryWindowState.txt`)
+
+The plugin auto-saves your window layout on unload and restores it at
+startup. **You normally never touch this file** — it's the persisted form
+of every position drag, resize, view pan/zoom, map toggle, and altitude
+filter change.
+
+**What survives a restart, per window:**
+
+- Screen position + size
+- Collapsed-to-title-bar state
+- View center (lat/lon) and zoom (nm/px)
+- Altitude filter (inherit / explicit min/max)
+- The set of maps hidden in this window
+
+**Format** (line-based, one `WINDOW` block per open window):
+
+```
+WINDOW
+POS:100:100:420:420
+COLLAPSED:0
+UNCOLLAPSED_H:420
+VIEW:14.500000:121.000000:0.500000
+ALT:1:-2147483648:2147483647
+HIDE:RPLL Groundlayout
+HIDE:RPLL Background
+```
+
+| Field           | Meaning |
+| --------------- | ------- |
+| `POS`           | `x:y:w:h` screen coords, pixels                                 |
+| `COLLAPSED`     | `0` / `1`                                                       |
+| `UNCOLLAPSED_H` | Height to restore when un-collapsed                             |
+| `VIEW`          | `centerLat:centerLon:nmPerPixel`                                |
+| `ALT`           | `inherit:minFt:maxFt` (inherit=1 means use file-level filter)   |
+| `HIDE`          | One per hidden map (visible = absent). Names match `MAP:` names |
+
+Up to 5 `WINDOW` blocks are restored; extras are silently dropped. Lines
+starting with `//` and blank lines are ignored.
+
+**Useful one-offs:**
+
+| Want to... | Do this |
+| ---------- | ------- |
+| Reset to a single default window | Delete `SecondaryWindowState.txt` |
+| Force save mid-session (e.g. before EuroScope might crash) | `.sw save` |
+| Reset one window without losing the others | Remove its `WINDOW` block, or just delete its `HIDE:` lines for "all visible" |
+| Ship a default layout to a teammate | Send them your `SecondaryWindowState.txt` |
+
+---
+
 ## Chat commands
 
 All issued in the EuroScope command bar:
 
-| Command               | Effect                                                    |
-| --------------------- | --------------------------------------------------------- |
-| `.sw reload`          | Re-read both `.txt` files from disk                       |
-| `.sw load <path>`     | Load a different map file (e.g. Ground Radar's)           |
-| `.sw settings <path>` | Load a different settings file                            |
-| `.sw ese <path>`      | Import labels from a `.ese` file (one category → one map) |
-| `.sw sct <path>`      | Import a `.sct` / `.sct2` sector file ad-hoc              |
-| `.sw new`             | Open another Secondary Window (up to 5 total)             |
-| `.sw show`            | Show all hidden windows                                   |
-| `.sw hide`            | Hide all windows                                          |
+| Command                   | Effect                                                            |
+| ------------------------- | ----------------------------------------------------------------- |
+| `.sw reload`              | Re-read both `.txt` files from disk (also re-imports SCTs)        |
+| `.sw load <path>`         | Load a different map file (e.g. Ground Radar's)                   |
+| `.sw settings <path>`     | Load a different settings file                                    |
+| `.sw ese <path>`          | Import labels from a `.ese` file (one category → one map)         |
+| `.sw sct <path>`          | Import a `.sct` / `.sct2` sector file ad-hoc                      |
+| `.sw new`                 | Open another Secondary Window (up to 5 total, all maps hidden)    |
+| `.sw show`                | Show all hidden windows                                           |
+| `.sw hide`                | Hide all windows                                                  |
+| `.sw save`                | Force-save window state now (positions, hidden maps, alt filter)  |
+| `.sw alt <min> <max>`     | Set the altitude filter on **all** windows. Use feet, e.g. `.sw alt 3000 24000`. |
+| `.sw alt off` / `.sw alt reset` | Reset altitude filter on all windows back to the map file default. |
 
 ---
 
@@ -474,6 +599,7 @@ unknown lines without complaining.
 | `LABEL_FONT_BOLD`    | `true` / `false` | `false`       | Bold label text.                                                                                                      |
 | `TRAFFIC_DOT_COLOR`  | `R:G:B`          | `255:255:0`   | Aircraft dot color.                                                                                                   |
 | `TRAFFIC_DOT_RADIUS` | `px`             | `3`           | Width of the square dots.                                                                                             |
+| `TRAFFIC_TRAIL_LENGTH` | integer        | `0`           | Number of historical positions drawn behind each aircraft. `0` disables the trail entirely.                            |
 | `SHOW_TAGS`          | `true` / `false` | `true`        | Master switch for callsign labels.                                                                                    |
 | `TAG_COLOR`          | `R:G:B`          | `255:255:0`   | Default tag text color.                                                                                               |
 | `COLOR_DEPARTURE`    | `R:G:B`          | *(unset)*     | Override tag color when the aircraft's origin airport is active for departure in EuroScope.                           |
@@ -491,13 +617,33 @@ unknown lines without complaining.
 
 ## Window controls
 
-| Action                       | Result                                                                 |
-| ---------------------------- | ---------------------------------------------------------------------- |
-| Drag title bar               | Move the window                                                        |
-| Drag bottom-right grip       | Resize                                                                 |
-| Drag inside map area         | Pan the map view                                                       |
-| Mouse wheel                  | Zoom                                                                   |
-| Right-click map area         | Open the maps popup (toggle individual maps on/off, reload from files) |
-| Click the X in the title bar | Hide the window (`.sw show` to bring it back)                          |
+| Action                            | Result                                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------- |
+| Drag title bar                    | Move the window                                                                       |
+| Drag bottom-right grip            | Resize                                                                                |
+| Drag inside map area              | Pan the map view                                                                      |
+| Drag an aircraft callsign         | Move that tag's offset relative to its dot (per-aircraft, persists for the session)   |
+| Mouse wheel                       | Zoom                                                                                  |
+| Right-click map area              | Open the maps popup (toggle maps, altitude filter, load `.asr`, open new window, etc.) |
+| Click the **-** in the title bar  | Collapse the window to just the title bar (click again to restore)                    |
+| Click the **X** in the title bar  | Hide the window (`.sw show` to bring it back)                                         |
+
+### Right-click menu items
+
+| Item                              | Effect                                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------- |
+| Map name (with checkmark)         | Toggle that map's visibility in **this window only**                                  |
+| Folder submenu (e.g. `SCT GEO`)   | Same, grouped by `FOLDER:` directive or section name                                  |
+| **Altitude filter...**            | Open a modal dialog for the per-window altitude filter (min/max in feet, or "No filter") |
+| **Open new Secondary Window**     | Spawn another window (up to 5). Starts with all maps hidden.                          |
+| **Load .asr...**                  | File picker — apply that EuroScope `.asr`'s visible-map list to this window only      |
+| **Reload maps**                   | Re-read the map file from disk (also re-imports any `SCT_FILE:` entries)              |
+| **Reload settings**               | Re-read settings + re-import SCT content. Pan/zoom preserved.                          |
+
+When the map area is empty (no maps loaded, or every map hidden in this
+window), the window shows a centered hint — **No maps loaded** or
+**No maps visible**. The first time you enable a map in a previously-blank
+window, the view automatically refits to the map's bounding box so you
+see it right away.
 
 ---
