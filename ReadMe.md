@@ -185,6 +185,62 @@ TEXT_SIZE:0      // reset to default
 
 ---
 
+## Importing `.sct` / `.sct2` sector files
+
+Standard EuroScope sector files can be merged straight into the maps menu
+— no need to translate them into the plugin's own map format.
+
+Add one line per file to **`SecondaryWindowSettings.txt`**:
+
+```
+SCT_FILE:Philippines.sct
+SCT_FILE:C:\EuroScope\Sectors\KPHL_FULL.sct2
+```
+
+Relative paths resolve against the DLL directory; absolute paths work
+too. Multiple `SCT_FILE:` lines are allowed and all merge into the same
+menu. The file is re-read on `.sw reload`.
+
+For one-off ad-hoc loads from the chat bar:
+
+```
+.sw sct C:\path\to\file.sct
+```
+
+**What gets imported**
+
+| `.sct` section            | Becomes                                                  | Folder            |
+| ------------------------- | -------------------------------------------------------- | ----------------- |
+| `[ARTCC]`                 | One toggle per boundary name (polyline)                  | `SCT ARTCC`       |
+| `[ARTCC HIGH]`            | One toggle per boundary name (polyline)                  | `SCT ARTCC HIGH`  |
+| `[ARTCC LOW]`             | One toggle per boundary name (polyline)                  | `SCT ARTCC LOW`   |
+| `[SID]`                   | One toggle per procedure (polyline)                      | `SCT SID`         |
+| `[STAR]`                  | One toggle per procedure (polyline)                      | `SCT STAR`        |
+| `[GEO]`                   | One toggle per `;comment` group above a run of lines     | `SCT GEO`         |
+| `[REGIONS]`               | One toggle per named region (filled polygon)             | `SCT REGIONS`     |
+
+Other sections (`[INFO]`, `[VOR]`, `[NDB]`, `[FIXES]`, `[AIRPORT]`,
+`[RUNWAY]`, airways, `[LABELS]`) are parsed and discarded for now.
+
+**Colors**
+
+The importer honours each section's color tokens when present. Resolution
+order for each token:
+
+1. Integer in Windows COLORREF form (`R + G*256 + B*65536`)
+2. Matches a `#define COLORNAME <colorref>` earlier in the same file
+3. Falls back to white
+
+Lines without an explicit color token (e.g. some `[ARTCC]` entries) get
+the same white default.
+
+> Big sector files produce a *lot* of menu entries — each ARTCC name and
+> each procedure becomes its own line. Because new windows start with
+> every map hidden, you opt in to just the ones you want for that window
+> and your choices persist in `SecondaryWindowState.txt`.
+
+---
+
 ## Settings file (`SecondaryWindowSettings.txt`)
 
 Same `KEY:value` syntax. Any key you omit falls back to the built-in default.
@@ -348,6 +404,7 @@ All issued in the EuroScope command bar:
 | `.sw load <path>`     | Load a different map file (e.g. Ground Radar's)           |
 | `.sw settings <path>` | Load a different settings file                            |
 | `.sw ese <path>`      | Import labels from a `.ese` file (one category → one map) |
+| `.sw sct <path>`      | Import a `.sct` / `.sct2` sector file ad-hoc              |
 | `.sw new`             | Open another Secondary Window (up to 5 total)             |
 | `.sw show`            | Show all hidden windows                                   |
 | `.sw hide`            | Hide all windows                                          |
@@ -409,6 +466,7 @@ unknown lines without complaining.
 | `TAG_OFFSET_X`       | `px`             | `5`           | Default horizontal offset of tag from the dot. Per-aircraft offset wins once a tag is dragged.                        |
 | `TAG_OFFSET_Y`       | `px`             | `-3`          | Default vertical offset (negative = above the dot).                                                                   |
 | `TAG_LINE`           | format string    | —             | Adds one line to every tag. Repeat for multiple lines. Supports `{placeholder}`. See the *Tag content* section above. |
+| `SCT_FILE`           | path             | —             | Imports a `.sct` / `.sct2` sector file. Relative paths resolve against the DLL directory. Repeat for multiple files. See *Importing `.sct` sector files*. |
 
 ---
 
