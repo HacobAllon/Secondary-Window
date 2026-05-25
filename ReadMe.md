@@ -197,8 +197,26 @@ SCT_FILE:Philippines.sct
 SCT_FILE:C:\EuroScope\Sectors\KPHL_FULL.sct2
 ```
 
-Relative paths resolve against the DLL directory; absolute paths work
-too. Multiple `SCT_FILE:` lines are allowed and all merge into the same
+Path resolution order (first match wins):
+
+1. **Absolute** (`C:\...`, `D:\...`, UNC) — used as-is.
+2. **Leading `\`** (e.g. `\2605.sct`) — resolved against the EuroScope
+   profile root, matching the `.prf` convention.
+3. **`SCT_DIR`-relative** — see below.
+4. **Plain relative** (`2605.sct`, `sub\file.sct`) — tried against the
+   profile root first, then next-to-the-DLL.
+
+If you keep all your sector files in one folder, set `SCT_DIR:` once and
+reference each file by name only:
+
+```
+SCT_DIR:..\VATPHIL Sector File
+SCT_FILE:2605.sct
+SCT_FILE:2606.sct
+```
+
+`SCT_DIR` is itself resolved like a `SCT_FILE` path (profile root, then
+DLL). Multiple `SCT_FILE:` lines are allowed and all merge into the same
 menu. The file is re-read on `.sw reload`.
 
 For one-off ad-hoc loads from the chat bar:
@@ -466,7 +484,8 @@ unknown lines without complaining.
 | `TAG_OFFSET_X`       | `px`             | `5`           | Default horizontal offset of tag from the dot. Per-aircraft offset wins once a tag is dragged.                        |
 | `TAG_OFFSET_Y`       | `px`             | `-3`          | Default vertical offset (negative = above the dot).                                                                   |
 | `TAG_LINE`           | format string    | —             | Adds one line to every tag. Repeat for multiple lines. Supports `{placeholder}`. See the *Tag content* section above. |
-| `SCT_FILE`           | path             | —             | Imports a `.sct` / `.sct2` sector file. Relative paths resolve against the DLL directory. Repeat for multiple files. See *Importing `.sct` sector files*. |
+| `SCT_FILE`           | path             | —             | Imports a `.sct` / `.sct2` sector file. See *Importing `.sct` sector files* for the path-resolution rules. Repeat for multiple files. |
+| `SCT_DIR`            | path             | —             | Optional base folder for plain (non-absolute, non-`\`-anchored) `SCT_FILE:` entries. Lets you reference every sector by filename only. |
 
 ---
 
