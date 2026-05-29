@@ -13,7 +13,7 @@ altitude filtered traffic in a separate, always on top window.
    - `SecondaryWindowMap.txt`     ← put your map definitions here
    - `SecondaryWindowSettings.txt` ← put your settings here
 2. Drop all three files into the same folder.
-3. In EuroScope: **Other Set → Plug-ins → Load**, pick `SecondaryWindow.dll`.
+3. In EuroScope: **Other Set → Plugins → Load**, pick `SecondaryWindow.dll`.
 4. A small floating window labeled *Secondary Window* appears above EuroScope.
 
 ---
@@ -24,7 +24,7 @@ altitude filtered traffic in a separate, always on top window.
 | ----------------------------- | ----------------------------------------------------------------------- |
 | `SecondaryWindowMap.txt`      | Map definitions: colors, polygons, lines, polylines, labels.            |
 | `SecondaryWindowSettings.txt` | Visual settings: background, dots, fonts, tag format, `SCT_FILE:`, etc. |
-| `SecondaryWindowState.txt`    | Auto-saved window state: positions, sizes, view, per-window map visibility, altitude filter. Re-applied at startup. Safe to delete to reset. |
+| `SecondaryWindowState.txt`    | Auto saved window state                                                 |
 
 ### Commands
 
@@ -194,69 +194,23 @@ Standard EuroScope sector files can be merged straight into the maps menu
 Add one line per file to **`SecondaryWindowSettings.txt`**:
 
 ```
-SCT_FILE:Philippines.sct
-SCT_FILE:C:\EuroScope\Sectors\KPHL_FULL.sct2
+SCT_FILE:C:\EuroScope\Sectorfiles\xxxx.sct
 ```
 
-Path resolution order (first match wins):
+**What gets imported?**
 
-1. **Absolute** (`C:\...`, `D:\...`, UNC) — used as-is.
-2. **Leading `\`** (e.g. `\2605.sct`) — resolved against the EuroScope
-   profile root, matching the `.prf` convention.
-3. **`SCT_DIR`-relative** — see below.
-4. **Plain relative** (`2605.sct`, `sub\file.sct`) — tried against the
-   profile root first, then next-to-the-DLL.
-
-If you keep all your sector files in one folder, set `SCT_DIR:` once and
-reference each file by name only:
-
-```
-SCT_DIR:..\VATPHIL Sector File
-SCT_FILE:2605.sct
-SCT_FILE:2606.sct
-```
-
-`SCT_DIR` is itself resolved like a `SCT_FILE` path (profile root, then
-DLL). Multiple `SCT_FILE:` lines are allowed and all merge into the same
-menu. The file is re-read on `.sw reload`.
-
-For one-off ad-hoc loads from the chat bar:
-
-```
-.sw sct C:\path\to\file.sct
-```
-
-**What gets imported**
-
-| `.sct` section            | Becomes                                                  | Folder            |
-| ------------------------- | -------------------------------------------------------- | ----------------- |
-| `[ARTCC]`                 | One toggle per boundary name (polyline)                  | `SCT ARTCC`       |
-| `[ARTCC HIGH]`            | One toggle per boundary name (polyline)                  | `SCT ARTCC HIGH`  |
-| `[ARTCC LOW]`             | One toggle per boundary name (polyline)                  | `SCT ARTCC LOW`   |
-| `[SID]`                   | One toggle per procedure (polyline)                      | `SCT SID`         |
-| `[STAR]`                  | One toggle per procedure (polyline)                      | `SCT STAR`        |
-| `[GEO]`                   | One toggle per `;comment` group above a run of lines     | `SCT GEO`         |
-| `[REGIONS]`               | One toggle per named region (filled polygon)             | `SCT REGIONS`     |
+| `.sct` section | Becomes                                              | Folder       |
+| -------------- | ---------------------------------------------------- | ------------ |
+| `[ARTCC]`      | One toggle per boundary name (polyline)              | `ARTCC`      |
+| `[ARTCC HIGH]` | One toggle per boundary name (polyline)              | `ARTCC HIGH` |
+| `[ARTCC LOW]`  | One toggle per boundary name (polyline)              | `ARTCC LOW`  |
+| `[SID]`        | One toggle per procedure (polyline)                  | `SID`        |
+| `[STAR]`       | One toggle per procedure (polyline)                  | `STAR`       |
+| `[GEO]`        | One toggle per `;comment` group above a run of lines | `GEO`        |
+| `[REGIONS]`    | One toggle per named region (filled polygon)         | `REGIONS`    |
 
 Other sections (`[INFO]`, `[VOR]`, `[NDB]`, `[FIXES]`, `[AIRPORT]`,
-`[RUNWAY]`, airways, `[LABELS]`) are parsed and discarded for now.
-
-**Colors**
-
-The importer honours each section's color tokens when present. Resolution
-order for each token:
-
-1. Integer in Windows COLORREF form (`R + G*256 + B*65536`)
-2. Matches a `#define COLORNAME <colorref>` earlier in the same file
-3. Falls back to white
-
-Lines without an explicit color token (e.g. some `[ARTCC]` entries) get
-the same white default.
-
-> Big sector files produce a *lot* of menu entries — each ARTCC name and
-> each procedure becomes its own line. Because new windows start with
-> every map hidden, you opt in to just the ones you want for that window
-> and your choices persist in `SecondaryWindowState.txt`.
+`[RUNWAY]`, airways, `[LABELS]`) are parsed and discarded for now (I might add them in the future).
 
 ---
 
@@ -289,7 +243,7 @@ FILL_POLYGONS:true             // true = filled regions are filled; false = outl
 
 ### Label font (TEXT + inline ESE labels)
 
-Per-section overrides via `TEXT_SIZE:n` in the map file take precedence.
+Per section overrides via `TEXT_SIZE:n` in the map file take precedence.
 
 ```
 LABEL_FONT_FACE:Consolas
@@ -301,7 +255,7 @@ LABEL_FONT_BOLD:false
 
 ```
 TRAFFIC_DOT_COLOR:255:255:0    // dot color
-TRAFFIC_DOT_RADIUS:3           // px (half-width of the square dot)
+TRAFFIC_DOT_RADIUS:3           // px (half width of the square dot)
 TRAFFIC_TRAIL_LENGTH:5         // number of historical positions to draw (0 = off)
 ```
 
@@ -425,10 +379,10 @@ position, size, view (pan/zoom), altitude filter, and **per-window** map
 visibility — so you can have one window showing the ground layout for a
 particular airport and another showing the TMA, without affecting either.
 
-| How to open another | What you get |
-| ------------------- | ------------ |
+| How to open another                         | What you get                                                                     |
+| ------------------------------------------- | -------------------------------------------------------------------------------- |
 | Right-click → **Open new Secondary Window** | New window starts **with all maps hidden** so you can pick exactly what to show. |
-| `.sw new` chat command | Same as above. |
+| `.sw new` chat command                      | Same as above.                                                                   |
 
 The first window at plugin load seeds its visibility from the `ACTIVE:`
 flags in the map file (and from any saved `HIDE:` lines in
@@ -466,27 +420,17 @@ Low airway:            High airway:
 Lines from any other prefix (display config, plugin properties, window
 position, etc.) are ignored.
 
-**Name matching:** the second `:`-separated field of each line is the map
+**Name matching:** the second `:` separated field of each line is the map
 name. `Free Text:` entries strip everything after the first backslash
 (so `Free Text:RPLL TWY-GroundLayout\C:freetext` matches a map named
 `RPLL TWY-GroundLayout`). Comparison is case-insensitive.
-
-**Diagnostics:** the chat tells you how many of the `.asr`'s names ended
-up matching loaded maps, and lists any unmatched names so you can spot
-missing `.sct` / `.ese` imports:
-
-```
-ASR loaded: 12/47 maps visible  (18 unique names in .asr) - C:\...\foo.asr
-  6 name(s) in .asr had no matching loaded map:
-    rpll bays-groundlayout, rpll groundlayout, ...
-```
 
 ---
 
 ## Window state persistence (`SecondaryWindowState.txt`)
 
 The plugin auto-saves your window layout on unload and restores it at
-startup. **You normally never touch this file** — it's the persisted form
+startup. **You normally never touch this file**, it's the persisted form
 of every position drag, resize, view pan/zoom, map toggle, and altitude
 filter change.
 
@@ -498,7 +442,7 @@ filter change.
 - Altitude filter (inherit / explicit min/max)
 - The set of maps hidden in this window
 
-**Format** (line-based, one `WINDOW` block per open window):
+**Format** (line based, one `WINDOW` block per open window):
 
 ```
 WINDOW
@@ -511,26 +455,26 @@ HIDE:RPLL Groundlayout
 HIDE:RPLL Background
 ```
 
-| Field           | Meaning |
-| --------------- | ------- |
+| Field           | Meaning                                                         |
+| --------------- | --------------------------------------------------------------- |
 | `POS`           | `x:y:w:h` screen coords, pixels                                 |
 | `COLLAPSED`     | `0` / `1`                                                       |
-| `UNCOLLAPSED_H` | Height to restore when un-collapsed                             |
+| `UNCOLLAPSED_H` | Height to restore when uncollapsed                              |
 | `VIEW`          | `centerLat:centerLon:nmPerPixel`                                |
-| `ALT`           | `inherit:minFt:maxFt` (inherit=1 means use file-level filter)   |
+| `ALT`           | `inherit:minFt:maxFt` (inherit=1 means use file level filter)   |
 | `HIDE`          | One per hidden map (visible = absent). Names match `MAP:` names |
 
 Up to 5 `WINDOW` blocks are restored; extras are silently dropped. Lines
 starting with `//` and blank lines are ignored.
 
-**Useful one-offs:**
+**Useful one offs:**
 
-| Want to... | Do this |
-| ---------- | ------- |
-| Reset to a single default window | Delete `SecondaryWindowState.txt` |
-| Force save mid-session (e.g. before EuroScope might crash) | `.sw save` |
-| Reset one window without losing the others | Remove its `WINDOW` block, or just delete its `HIDE:` lines for "all visible" |
-| Ship a default layout to a teammate | Send them your `SecondaryWindowState.txt` |
+| Want to...                                                 | Do this                                                                       |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Reset to a single default window                           | Delete `SecondaryWindowState.txt`                                             |
+| Force save mid-session (e.g. before EuroScope might crash) | `.sw save`                                                                    |
+| Reset one window without losing the others                 | Remove its `WINDOW` block, or just delete its `HIDE:` lines for "all visible" |
+| Ship a default layout to a teammate                        | Send them your `SecondaryWindowState.txt`                                     |
 
 ---
 
@@ -538,19 +482,19 @@ starting with `//` and blank lines are ignored.
 
 All issued in the EuroScope command bar:
 
-| Command                   | Effect                                                            |
-| ------------------------- | ----------------------------------------------------------------- |
-| `.sw reload`              | Re-read both `.txt` files from disk (also re-imports SCTs)        |
-| `.sw load <path>`         | Load a different map file (e.g. Ground Radar's)                   |
-| `.sw settings <path>`     | Load a different settings file                                    |
-| `.sw ese <path>`          | Import labels from a `.ese` file (one category → one map)         |
-| `.sw sct <path>`          | Import a `.sct` / `.sct2` sector file ad-hoc                      |
-| `.sw new`                 | Open another Secondary Window (up to 5 total, all maps hidden)    |
-| `.sw show`                | Show all hidden windows                                           |
-| `.sw hide`                | Hide all windows                                                  |
-| `.sw save`                | Force-save window state now (positions, hidden maps, alt filter)  |
-| `.sw alt <min> <max>`     | Set the altitude filter on **all** windows. Use feet, e.g. `.sw alt 3000 24000`. |
-| `.sw alt off` / `.sw alt reset` | Reset altitude filter on all windows back to the map file default. |
+| Command                         | Effect                                                                           |
+| ------------------------------- | -------------------------------------------------------------------------------- |
+| `.sw reload`                    | Re-read both `.txt` files from disk (also re-imports SCTs)                       |
+| `.sw load <path>`               | Load a different map file (e.g. Ground Radar's)                                  |
+| `.sw settings <path>`           | Load a different settings file                                                   |
+| `.sw ese <path>`                | Import labels from a `.ese` file (one category → one map)                        |
+| `.sw sct <path>`                | Import a `.sct` / `.sct2` sector file ad-hoc                                     |
+| `.sw new`                       | Open another Secondary Window (up to 5 total, all maps hidden)                   |
+| `.sw show`                      | Show all hidden windows                                                          |
+| `.sw hide`                      | Hide all windows                                                                 |
+| `.sw save`                      | Force-save window state now (positions, hidden maps, alt filter)                 |
+| `.sw alt <min> <max>`           | Set the altitude filter on **all** windows. Use feet, e.g. `.sw alt 3000 24000`. |
+| `.sw alt off` / `.sw alt reset` | Reset altitude filter on all windows back to the map file default.               |
 
 ---
 
@@ -584,61 +528,61 @@ unknown lines without complaining.
 
 ### `SecondaryWindowSettings.txt`
 
-| Key                  | Value            | Default       | Remarks                                                                                                               |
-| -------------------- | ---------------- | ------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `//`                 | anything         | —             | Comment line.                                                                                                         |
-| `BACKGROUND_COLOR`   | `R:G:B`          | `128:128:128` | Map area background.                                                                                                  |
-| `BORDER_COLOR`       | `R:G:B`          | `40:40:40`    | Outline around the window.                                                                                            |
-| `TITLE_BAR_COLOR`    | `R:G:B`          | `80:80:80`    | Strip behind the title text.                                                                                          |
-| `TITLE_TEXT_COLOR`   | `R:G:B`          | `220:220:220` |                                                                                                                       |
-| `RESIZE_GRIP_COLOR`  | `R:G:B`          | `140:140:140` |                                                                                                                       |
-| `LINE_WIDTH`         | `px`             | `1`           | Width for lines, polygon outlines, polylines.                                                                         |
-| `FILL_POLYGONS`      | `true` / `false` | `true`        | `false` makes `REGION` shapes outline-only.                                                                           |
-| `LABEL_FONT_FACE`    | font name        | `Consolas`    | Font for `TEXT:` labels                                                                                               |
-| `LABEL_FONT_SIZE`    | `px`             | `12`          | Default label height. Overridable per section with `TEXT_SIZE:`.                                                      |
-| `LABEL_FONT_BOLD`    | `true` / `false` | `false`       | Bold label text.                                                                                                      |
-| `TRAFFIC_DOT_COLOR`  | `R:G:B`          | `255:255:0`   | Aircraft dot color.                                                                                                   |
-| `TRAFFIC_DOT_RADIUS` | `px`             | `3`           | Width of the square dots.                                                                                             |
-| `TRAFFIC_TRAIL_LENGTH` | integer        | `0`           | Number of historical positions drawn behind each aircraft. `0` disables the trail entirely.                            |
-| `SHOW_TAGS`          | `true` / `false` | `true`        | Master switch for callsign labels.                                                                                    |
-| `TAG_COLOR`          | `R:G:B`          | `255:255:0`   | Default tag text color.                                                                                               |
-| `COLOR_DEPARTURE`    | `R:G:B`          | *(unset)*     | Override tag color when the aircraft's origin airport is active for departure in EuroScope.                           |
-| `COLOR_ARRIVAL`      | `R:G:B`          | *(unset)*     | Override tag color when the aircraft's destination airport is active for arrival in EuroScope. Wins over departure.   |
-| `TAG_FONT_FACE`      | font name        | `Consolas`    | Tag font.                                                                                                             |
-| `TAG_FONT_SIZE`      | `px`             | `12`          | Tag font size.                                                                                                        |
-| `TAG_FONT_BOLD`      | `true` / `false` | `false`       | Bold tag text.                                                                                                        |
-| `TAG_OFFSET_X`       | `px`             | `5`           | Default horizontal offset of tag from the dot. Per-aircraft offset wins once a tag is dragged.                        |
-| `TAG_OFFSET_Y`       | `px`             | `-3`          | Default vertical offset (negative = above the dot).                                                                   |
-| `TAG_LINE`           | format string    | —             | Adds one line to every tag. Repeat for multiple lines. Supports `{placeholder}`. See the *Tag content* section above. |
-| `SCT_FILE`           | path             | —             | Imports a `.sct` / `.sct2` sector file. See *Importing `.sct` sector files* for the path-resolution rules. Repeat for multiple files. |
-| `SCT_DIR`            | path             | —             | Optional base folder for plain (non-absolute, non-`\`-anchored) `SCT_FILE:` entries. Lets you reference every sector by filename only. |
+| Key                    | Value            | Default       | Remarks                                                                                                                               |
+| ---------------------- | ---------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `//`                   | anything         | —             | Comment line.                                                                                                                         |
+| `BACKGROUND_COLOR`     | `R:G:B`          | `128:128:128` | Map area background.                                                                                                                  |
+| `BORDER_COLOR`         | `R:G:B`          | `40:40:40`    | Outline around the window.                                                                                                            |
+| `TITLE_BAR_COLOR`      | `R:G:B`          | `80:80:80`    | Strip behind the title text.                                                                                                          |
+| `TITLE_TEXT_COLOR`     | `R:G:B`          | `220:220:220` |                                                                                                                                       |
+| `RESIZE_GRIP_COLOR`    | `R:G:B`          | `140:140:140` |                                                                                                                                       |
+| `LINE_WIDTH`           | `px`             | `1`           | Width for lines, polygon outlines, polylines.                                                                                         |
+| `FILL_POLYGONS`        | `true` / `false` | `true`        | `false` makes `REGION` shapes outline only.                                                                                           |
+| `LABEL_FONT_FACE`      | font name        | `Consolas`    | Font for `TEXT:` labels                                                                                                               |
+| `LABEL_FONT_SIZE`      | `px`             | `12`          | Default label height. Overridable per section with `TEXT_SIZE:`.                                                                      |
+| `LABEL_FONT_BOLD`      | `true` / `false` | `false`       | Bold label text.                                                                                                                      |
+| `TRAFFIC_DOT_COLOR`    | `R:G:B`          | `255:255:0`   | Aircraft dot color.                                                                                                                   |
+| `TRAFFIC_DOT_RADIUS`   | `px`             | `3`           | Width of the square dots.                                                                                                             |
+| `TRAFFIC_TRAIL_LENGTH` | integer          | `0`           | Number of historical positions drawn behind each aircraft. `0` disables the trail entirely.                                           |
+| `SHOW_TAGS`            | `true` / `false` | `true`        | Master switch for callsign labels.                                                                                                    |
+| `TAG_COLOR`            | `R:G:B`          | `255:255:0`   | Default tag text color.                                                                                                               |
+| `COLOR_DEPARTURE`      | `R:G:B`          | *(unset)*     | Override tag color when the aircraft's origin airport is active for departure in EuroScope.                                           |
+| `COLOR_ARRIVAL`        | `R:G:B`          | *(unset)*     | Override tag color when the aircraft's destination airport is active for arrival in EuroScope. Wins over departure.                   |
+| `TAG_FONT_FACE`        | font name        | `Consolas`    | Tag font.                                                                                                                             |
+| `TAG_FONT_SIZE`        | `px`             | `12`          | Tag font size.                                                                                                                        |
+| `TAG_FONT_BOLD`        | `true` / `false` | `false`       | Bold tag text.                                                                                                                        |
+| `TAG_OFFSET_X`         | `px`             | `5`           | Default horizontal offset of tag from the dot. Per-aircraft offset wins once a tag is dragged.                                        |
+| `TAG_OFFSET_Y`         | `px`             | `-3`          | Default vertical offset (negative = above the dot).                                                                                   |
+| `TAG_LINE`             | format string    | —             | Adds one line to every tag. Repeat for multiple lines. Supports `{placeholder}`. See the *Tag content* section above.                 |
+| `SCT_FILE`             | path             | —             | Imports a `.sct` / `.sct2` sector file. See *Importing `.sct` sector files* for the path resolution rules. Repeat for multiple files. |
+| `SCT_DIR`              | path             | —             | Optional base folder for plain (non absolute, non`\`anchored) `SCT_FILE:` entries. Lets you reference every sector by filename only.  |
 
 ---
 
 ## Window controls
 
-| Action                            | Result                                                                                |
-| --------------------------------- | ------------------------------------------------------------------------------------- |
-| Drag title bar                    | Move the window                                                                       |
-| Drag bottom-right grip            | Resize                                                                                |
-| Drag inside map area              | Pan the map view                                                                      |
-| Drag an aircraft callsign         | Move that tag's offset relative to its dot (per-aircraft, persists for the session)   |
-| Mouse wheel                       | Zoom                                                                                  |
-| Right-click map area              | Open the maps popup (toggle maps, altitude filter, load `.asr`, open new window, etc.) |
-| Click the **-** in the title bar  | Collapse the window to just the title bar (click again to restore)                    |
-| Click the **X** in the title bar  | Hide the window (`.sw show` to bring it back)                                         |
+| Action                           | Result                                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------------------- |
+| Drag title bar                   | Move the window                                                                        |
+| Drag bottom-right grip           | Resize                                                                                 |
+| Drag inside map area             | Pan the map view                                                                       |
+| Drag an aircraft callsign        | Move that tag's offset relative to its dot (per aircraft, persists for the session)    |
+| Mouse wheel                      | Zoom                                                                                   |
+| Right-click map area             | Open the maps popup (toggle maps, altitude filter, load `.asr`, open new window, etc.) |
+| Click the **-** in the title bar | Collapse the window to just the title bar (click again to restore)                     |
+| Click the **X** in the title bar | Hide the window (`.sw show` to bring it back)                                          |
 
 ### Right-click menu items
 
-| Item                              | Effect                                                                                |
-| --------------------------------- | ------------------------------------------------------------------------------------- |
-| Map name (with checkmark)         | Toggle that map's visibility in **this window only**                                  |
-| Folder submenu (e.g. `SCT GEO`)   | Same, grouped by `FOLDER:` directive or section name                                  |
-| **Altitude filter...**            | Open a modal dialog for the per-window altitude filter (min/max in feet, or "No filter") |
-| **Open new Secondary Window**     | Spawn another window (up to 5). Starts with all maps hidden.                          |
-| **Load .asr...**                  | File picker — apply that EuroScope `.asr`'s visible-map list to this window only      |
-| **Reload maps**                   | Re-read the map file from disk (also re-imports any `SCT_FILE:` entries)              |
-| **Reload settings**               | Re-read settings + re-import SCT content. Pan/zoom preserved.                          |
+| Item                            | Effect                                                                                   |
+| ------------------------------- | ---------------------------------------------------------------------------------------- |
+| Map name (with checkmark)       | Toggle that map's visibility in **this window only**                                     |
+| Folder submenu (e.g. `SCT GEO`) | Same, grouped by `FOLDER:` directive or section name                                     |
+| **Altitude filter...**          | Open a modal dialog for the per window altitude filter (min/max in feet, or "No filter") |
+| **Open new Secondary Window**   | Spawn another window (up to 5). Starts with all maps hidden.                             |
+| **Load .asr...**                | File picker — apply that EuroScope `.asr`'s visible map list to this window only         |
+| **Reload maps**                 | Re-read the map file from disk (also re-imports any `SCT_FILE:` entries)                 |
+| **Reload settings**             | Re-read settings + re-import SCT content.                                                |
 
 When the map area is empty (no maps loaded, or every map hidden in this
 window), the window shows a centered hint — **No maps loaded** or
