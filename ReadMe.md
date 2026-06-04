@@ -1,7 +1,9 @@
 # Secondary Window
 
-A floating popout for EuroScope that draws TopSky and Groundradar style polygon maps and
-altitude filtered traffic in a separate, always on top window.
+A floating popout for EuroScope that draws polygon maps from .sct and .ese
+
+<img width="392" height="337" alt="Screenshot 2026-06-04 at 11 40 11 am" src="https://github.com/user-attachments/assets/4ba99342-2985-4bf2-9524-b6af797b72ed" />
+<img width="1919" height="941" alt="Screenshot 2026-06-04 at 11 46 42 am" src="https://github.com/user-attachments/assets/5183b2b1-05f2-46a5-b309-87cf813184a1" />
 
 ---
 
