@@ -208,9 +208,32 @@ SCT_FILE:C:\EuroScope\Sectorfiles\xxxx.sct
 | `[STAR]`       | One toggle per procedure (polyline)                  | `STAR`       |
 | `[GEO]`        | One toggle per `;comment` group above a run of lines | `GEO`        |
 | `[REGIONS]`    | One toggle per named region (filled polygon)         | `REGIONS`    |
+| `[FIXES]`      | All fixes collapse into one `FIXES` toggle (symbol + name) | (root)  |
 
-Other sections (`[INFO]`, `[VOR]`, `[NDB]`, `[FIXES]`, `[AIRPORT]`,
-`[RUNWAY]`, airways, `[LABELS]`) are parsed and discarded for now (I might add them in the future).
+Other sections (`[INFO]`, `[VOR]`, `[NDB]`, `[AIRPORT]`, `[RUNWAY]`,
+airways, `[LABELS]`) are parsed and discarded for now (I might add them in
+the future).
+
+### Waypoints (fixes)
+
+The `[FIXES]` section of a sector file lists navigation fixes as
+`NAME LAT LON`, for example:
+
+```
+[FIXES]
+ALGAD N013.11.08.498 E123.55.19.199
+```
+
+Every fix in the file lands in a single layer called `FIXES`. It starts
+hidden like the rest of the SCT imports, so open the sidebar and tick
+`FIXES` to show them. Each fix draws as a small triangle with its name
+beside it. The symbol and name share one color you set with
+`WAYPOINT_COLOR`, and `WAYPOINT_SIZE` controls how big the triangle is.
+
+```
+WAYPOINT_COLOR:120:160:200     // R:G:B of the symbol and label
+WAYPOINT_SIZE:4                // px, half height of the triangle
+```
 
 ---
 
@@ -273,9 +296,24 @@ TAG_FONT_SIZE:12               // pixel height
 TAG_FONT_BOLD:false
 TAG_OFFSET_X:5                 // px from dot center (positive = right)
 TAG_OFFSET_Y:-3                // px from dot center (negative = up)
-TAG_CLICK_WIDTH:80             // clickable rect (currently unused for clicks)
+TAG_CLICK_WIDTH:80             // width of the clickable/hover area for the callsign
 TAG_CLICK_HEIGHT:14
+TAG_BACKGROUND:false           // true draws a filled box behind every tag
+TAG_BG_COLOR:0:0:0             // R:G:B of that box
+TAG_BG_PADDING:2               // px of fill around the text on each side
+TAG_BACKGROUND_HOVER:false     // true shows the box only on the tag under the cursor
 ```
+
+#### Tag background
+
+`TAG_BACKGROUND` puts a solid color box behind the tag text so callsigns stay
+readable over busy ground layouts. `TAG_BG_COLOR` sets that color, and
+`TAG_BG_PADDING` controls how far the fill reaches past the text on each side.
+
+`TAG_BACKGROUND_HOVER` is the lighter option. Tags stay transparent until you
+move the mouse over one, and only that tag gets the box. Use it on its own for a
+clean look that highlights whatever you point at, or alongside `TAG_BACKGROUND`
+for an always on fill. Both modes share `TAG_BG_COLOR`.
 
 ### Tag content
 
@@ -316,12 +354,14 @@ Position / radar data (always available):
 | `{gs}`       | Reported ground speed (knots)                                         |
 | `{hdg}`      | Reported heading (degrees)                                            |
 | `{vs}`       | Vertical speed (feet per minute)                                      |
+| `{trend}`    | Vertical trend arrow: `^` climbing, `v` descending, blank when level  |
 
 Flight-plan / controller-assigned data (empty if no flight plan correlated):
 
 | Placeholder | What it shows                                                                           |
 | ----------- | --------------------------------------------------------------------------------------- |
 | `{type}`    | Aircraft ICAO type (e.g. `A320`, `B738`)                                                |
+| `{wtc}`     | Wake turbulence category letter (`L`, `M`, `H`, `J`)                                     |
 | `{cfl}`     | Cleared altitude as 3-digit FL (`240` = 24 000 ft, `030` = 3 000 ft). Empty if not set. |
 | `{cflft}`   | Cleared altitude in raw feet                                                            |
 | `{asquawk}` | Assigned (not necessarily set yet) squawk code                                          |
@@ -333,6 +373,8 @@ Flight-plan / controller-assigned data (empty if no flight plan correlated):
 | `{sid}`     | SID name                                                                                |
 | `{star}`    | STAR name                                                                               |
 | `{rwy}`     | Departure runway                                                                        |
+| `{arrwy}`   | Arrival runway                                                                          |
+| `{rfl}`     | Requested cruising level as FL                                                          |
 
 Anything between `{` and `}` that isn't a known placeholder is echoed back
 literally, so typos are visible (`{calsign}` shows as `{calsign}` in the
@@ -538,6 +580,8 @@ unknown lines without complaining.
 | `RESIZE_GRIP_COLOR`    | `R:G:B`          | `140:140:140` |                                                                                                                                       |
 | `LINE_WIDTH`           | `px`             | `1`           | Width for lines, polygon outlines, polylines.                                                                                         |
 | `FILL_POLYGONS`        | `true` / `false` | `true`        | `false` makes `REGION` shapes outline only.                                                                                           |
+| `WAYPOINT_COLOR`       | `R:G:B`          | `120:160:200` | Color of the fix triangle and its name (the `FIXES` layer).                                                                           |
+| `WAYPOINT_SIZE`        | `px`             | `4`           | Half height of the triangle symbol.                                                                                                  |
 | `LABEL_FONT_FACE`      | font name        | `Consolas`    | Font for `TEXT:` labels                                                                                                               |
 | `LABEL_FONT_SIZE`      | `px`             | `12`          | Default label height. Overridable per section with `TEXT_SIZE:`.                                                                      |
 | `LABEL_FONT_BOLD`      | `true` / `false` | `false`       | Bold label text.                                                                                                                      |
@@ -553,6 +597,12 @@ unknown lines without complaining.
 | `TAG_FONT_BOLD`        | `true` / `false` | `false`       | Bold tag text.                                                                                                                        |
 | `TAG_OFFSET_X`         | `px`             | `5`           | Default horizontal offset of tag from the dot. Per-aircraft offset wins once a tag is dragged.                                        |
 | `TAG_OFFSET_Y`         | `px`             | `-3`          | Default vertical offset (negative = above the dot).                                                                                   |
+| `TAG_CLICK_WIDTH`      | `px`             | `80`          | Width of the clickable and hover area around the callsign.                                                                            |
+| `TAG_CLICK_HEIGHT`     | `px`             | `14`          | Height of that area per line.                                                                                                         |
+| `TAG_BACKGROUND`       | `true` / `false` | `false`       | Draw a filled box behind every tag.                                                                                                   |
+| `TAG_BG_COLOR`         | `R:G:B`          | `0:0:0`       | Color of the tag background box. Setting this also turns the background on.                                                           |
+| `TAG_BG_PADDING`       | `px`             | `2`           | How far the fill reaches past the text on each side.                                                                                  |
+| `TAG_BACKGROUND_HOVER` | `true` / `false` | `false`       | Show the background only on the tag under the cursor.                                                                                 |
 | `TAG_LINE`             | format string    | —             | Adds one line to every tag. Repeat for multiple lines. Supports `{placeholder}`. See the *Tag content* section above.                 |
 | `SCT_FILE`             | path             | —             | Imports a `.sct` / `.sct2` sector file. See *Importing `.sct` sector files* for the path resolution rules. Repeat for multiple files. |
 | `SCT_DIR`              | path             | —             | Optional base folder for plain (non absolute, non`\`anchored) `SCT_FILE:` entries. Lets you reference every sector by filename only.  |
@@ -566,23 +616,38 @@ unknown lines without complaining.
 | Drag title bar                   | Move the window                                                                        |
 | Drag bottom-right grip           | Resize                                                                                 |
 | Drag inside map area             | Pan the map view                                                                       |
+| Double click then drag in map area | Draw a measuring ruler that shows distance in NM and bearing at once                  |
 | Drag an aircraft callsign        | Move that tag's offset relative to its dot (per aircraft, persists for the session)    |
 | Mouse wheel                      | Zoom                                                                                   |
-| Right-click map area             | Open the maps popup (toggle maps, altitude filter, load `.asr`, open new window, etc.) |
+| Click the list button in title bar | Open the map picker sidebar to toggle maps on and off                                 |
+| Right-click map area             | Open the popup menu (altitude filter, hide aircraft on ground, new window, load `.asr`, reload) |
 | Click the **-** in the title bar | Collapse the window to just the title bar (click again to restore)                     |
 | Click the **X** in the title bar | Hide the window (`.sw show` to bring it back)                                          |
 
+### Map picker sidebar
+
+Map visibility lives in the sidebar now, not the right-click menu. Click the
+list button in the title bar to slide it open. It shows every loaded map as a
+tree grouped by folder (such as `GEO`, `REGIONS`, `ESE`, and per airport
+sub folders like `ESE/RPLL`). Tick a map to show it in this window, untick to
+hide it. Folders expand and collapse, and your layout is saved per window. The
+header buttons let you show all, hide all, or load a `.asr`.
+
+ESE free text imports nest under `ESE` by aerodrome, so the taxiway and bay
+labels for each airport sit under their own `ESE/<ICAO>` folder and each one
+has its own toggle.
+
 ### Right-click menu items
 
-| Item                            | Effect                                                                                   |
-| ------------------------------- | ---------------------------------------------------------------------------------------- |
-| Map name (with checkmark)       | Toggle that map's visibility in **this window only**                                     |
-| Folder submenu (e.g. `SCT GEO`) | Same, grouped by `FOLDER:` directive or section name                                     |
-| **Altitude filter...**          | Open a modal dialog for the per window altitude filter (min/max in feet, or "No filter") |
-| **Open new Secondary Window**   | Spawn another window (up to 5). Starts with all maps hidden.                             |
-| **Load .asr...**                | File picker — apply that EuroScope `.asr`'s visible map list to this window only         |
-| **Reload maps**                 | Re-read the map file from disk (also re-imports any `SCT_FILE:` entries)                 |
-| **Reload settings**             | Re-read settings + re-import SCT content.                                                |
+| Item                          | Effect                                                                                   |
+| ----------------------------- | ---------------------------------------------------------------------------------------- |
+| **Altitude filter...**        | Open a modal dialog for the per window altitude filter (min/max in feet, or "No filter") |
+| **Hide aircraft on ground**   | Skip slow targets (under about 40 kt) so taxiing and parked aircraft stop cluttering the view |
+| **Open new Secondary Window** | Spawn another window (up to 5). Starts with all maps hidden.                             |
+| **Load .asr...**              | File picker that applies an EuroScope `.asr` visible map list to this window only        |
+| **Hide maps**                 | Hide every map in this window for a blank slate                                          |
+| **Reload maps**               | Re-read the map file from disk (also re-imports any `SCT_FILE:` entries)                 |
+| **Reload settings**           | Re-read settings and re-import SCT content                                               |
 
 When the map area is empty (no maps loaded, or every map hidden in this
 window), the window shows a centered hint — **No maps loaded** or
