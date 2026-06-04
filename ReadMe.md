@@ -1,7 +1,6 @@
 # Secondary Window
 
-A floating popout for EuroScope that draws TopSky and Groundradar style polygon maps and
-altitude filtered traffic in a separate, always on top window.
+A floating popout for EuroScope that draws .sct and .ese polygon maps.
 
 ---
 
@@ -31,8 +30,6 @@ altitude filtered traffic in a separate, always on top window.
 ```
 .sw reload
 ```
-`.sw load <full-path>` / `.sw settings <full-path>` to use a file
-elsewhere.
 
 ---
 
@@ -199,16 +196,16 @@ SCT_FILE:C:\EuroScope\Sectorfiles\xxxx.sct
 
 **What gets imported?**
 
-| `.sct` section | Becomes                                              | Folder       |
-| -------------- | ---------------------------------------------------- | ------------ |
-| `[ARTCC]`      | One toggle per boundary name (polyline)              | `ARTCC`      |
-| `[ARTCC HIGH]` | One toggle per boundary name (polyline)              | `ARTCC HIGH` |
-| `[ARTCC LOW]`  | One toggle per boundary name (polyline)              | `ARTCC LOW`  |
-| `[SID]`        | One toggle per procedure (polyline)                  | `SID`        |
-| `[STAR]`       | One toggle per procedure (polyline)                  | `STAR`       |
-| `[GEO]`        | One toggle per `;comment` group above a run of lines | `GEO`        |
-| `[REGIONS]`    | One toggle per named region (filled polygon)         | `REGIONS`    |
-| `[FIXES]`      | All fixes collapse into one `FIXES` toggle (symbol + name) | (root)  |
+| `.sct` section | Becomes                                                    | Folder       |
+| -------------- | ---------------------------------------------------------- | ------------ |
+| `[ARTCC]`      | One toggle per boundary name (polyline)                    | `ARTCC`      |
+| `[ARTCC HIGH]` | One toggle per boundary name (polyline)                    | `ARTCC HIGH` |
+| `[ARTCC LOW]`  | One toggle per boundary name (polyline)                    | `ARTCC LOW`  |
+| `[SID]`        | One toggle per procedure (polyline)                        | `SID`        |
+| `[STAR]`       | One toggle per procedure (polyline)                        | `STAR`       |
+| `[GEO]`        | One toggle per `;comment` group above a run of lines       | `GEO`        |
+| `[REGIONS]`    | One toggle per named region (filled polygon)               | `REGIONS`    |
+| `[FIXES]`      | All fixes collapse into one `FIXES` toggle (symbol + name) | (root)       |
 
 Other sections (`[INFO]`, `[VOR]`, `[NDB]`, `[AIRPORT]`, `[RUNWAY]`,
 airways, `[LABELS]`) are parsed and discarded for now (I might add them in
@@ -361,7 +358,7 @@ Flight-plan / controller-assigned data (empty if no flight plan correlated):
 | Placeholder | What it shows                                                                           |
 | ----------- | --------------------------------------------------------------------------------------- |
 | `{type}`    | Aircraft ICAO type (e.g. `A320`, `B738`)                                                |
-| `{wtc}`     | Wake turbulence category letter (`L`, `M`, `H`, `J`)                                     |
+| `{wtc}`     | Wake turbulence category letter (`L`, `M`, `H`, `J`)                                    |
 | `{cfl}`     | Cleared altitude as 3-digit FL (`240` = 24 000 ft, `030` = 3 000 ft). Empty if not set. |
 | `{cflft}`   | Cleared altitude in raw feet                                                            |
 | `{asquawk}` | Assigned (not necessarily set yet) squawk code                                          |
@@ -421,10 +418,10 @@ position, size, view (pan/zoom), altitude filter, and **per-window** map
 visibility — so you can have one window showing the ground layout for a
 particular airport and another showing the TMA, without affecting either.
 
-| How to open another                         | What you get                                                                     |
-| ------------------------------------------- | -------------------------------------------------------------------------------- |
-| Right-click → **Open new Secondary Window** | New window starts **with all maps hidden** so you can pick exactly what to show. |
-| `.sw new` chat command                      | Same as above.                                                                   |
+| How to open another           | What you get                                                                     |
+| ----------------------------- | -------------------------------------------------------------------------------- |
+| Sidebar → **Open new window** | New window starts **with all maps hidden** so you can pick exactly what to show. |
+| `.sw new` chat command        | Same as above.                                                                   |
 
 The first window at plugin load seeds its visibility from the `ACTIVE:`
 flags in the map file (and from any saved `HIDE:` lines in
@@ -436,7 +433,7 @@ different view," not "show me everything again."
 
 ## Loading from EuroScope `.asr` files
 
-Right-click any Secondary Window → **Load .asr...** opens a Windows file
+Open the sidebar and click **Load .asr** to bring up a Windows file
 picker. Pick any EuroScope `.asr` and the window's visible-map set is
 replaced with whatever that `.asr` had on:
 
@@ -581,7 +578,7 @@ unknown lines without complaining.
 | `LINE_WIDTH`           | `px`             | `1`           | Width for lines, polygon outlines, polylines.                                                                                         |
 | `FILL_POLYGONS`        | `true` / `false` | `true`        | `false` makes `REGION` shapes outline only.                                                                                           |
 | `WAYPOINT_COLOR`       | `R:G:B`          | `120:160:200` | Color of the fix triangle and its name (the `FIXES` layer).                                                                           |
-| `WAYPOINT_SIZE`        | `px`             | `4`           | Half height of the triangle symbol.                                                                                                  |
+| `WAYPOINT_SIZE`        | `px`             | `4`           | Half height of the triangle symbol.                                                                                                   |
 | `LABEL_FONT_FACE`      | font name        | `Consolas`    | Font for `TEXT:` labels                                                                                                               |
 | `LABEL_FONT_SIZE`      | `px`             | `12`          | Default label height. Overridable per section with `TEXT_SIZE:`.                                                                      |
 | `LABEL_FONT_BOLD`      | `true` / `false` | `false`       | Bold label text.                                                                                                                      |
@@ -611,43 +608,46 @@ unknown lines without complaining.
 
 ## Window controls
 
-| Action                           | Result                                                                                 |
-| -------------------------------- | -------------------------------------------------------------------------------------- |
-| Drag title bar                   | Move the window                                                                        |
-| Drag bottom-right grip           | Resize                                                                                 |
-| Drag inside map area             | Pan the map view                                                                       |
-| Double click then drag in map area | Draw a measuring ruler that shows distance in NM and bearing at once                  |
-| Drag an aircraft callsign        | Move that tag's offset relative to its dot (per aircraft, persists for the session)    |
-| Mouse wheel                      | Zoom                                                                                   |
-| Click the list button in title bar | Open the map picker sidebar to toggle maps on and off                                 |
-| Right-click map area             | Open the popup menu (altitude filter, hide aircraft on ground, new window, load `.asr`, reload) |
-| Click the **-** in the title bar | Collapse the window to just the title bar (click again to restore)                     |
-| Click the **X** in the title bar | Hide the window (`.sw show` to bring it back)                                          |
+| Action                             | Result                                                                              |
+| ---------------------------------- | ----------------------------------------------------------------------------------- |
+| Drag title bar                     | Move the window                                                                     |
+| Drag bottom-right grip             | Resize                                                                              |
+| Right drag inside map area         | Pan the map view                                                                    |
+| Double click then drag in map area | Draw a measuring ruler that shows distance in NM and bearing at once                |
+| Drag an aircraft callsign          | Move that tag's offset relative to its dot (per aircraft, persists for the session) |
+| Mouse wheel                        | Zoom                                                                                |
+| Click the list button in title bar | Open the sidebar to toggle maps and reach every action                              |
+| Click the **-** in the title bar   | Collapse the window to just the title bar (click again to restore)                  |
+| Click the **X** in the title bar   | Hide the window (`.sw show` to bring it back)                                       |
 
-### Map picker sidebar
+Panning moved to the right mouse button so a left click stays free for tags
+and the measuring ruler. The right button no longer opens a popup menu;
+everything that used to live there now sits in the sidebar.
 
-Map visibility lives in the sidebar now, not the right-click menu. Click the
-list button in the title bar to slide it open. It shows every loaded map as a
-tree grouped by folder (such as `GEO`, `REGIONS`, `ESE`, and per airport
-sub folders like `ESE/RPLL`). Tick a map to show it in this window, untick to
-hide it. Folders expand and collapse, and your layout is saved per window. The
-header buttons let you show all, hide all, or load a `.asr`.
+### Sidebar
+
+Every control lives in the sidebar now. Click the list button in the title bar
+to slide it open. The top shows a row of action buttons, and below that the map
+list as a tree grouped by folder (such as `GEO`, `REGIONS`, `ESE`, and per
+airport sub folders like `ESE/RPLL`). Tick a map to show it in this window,
+untick to hide it. Folders expand and collapse, and your layout is saved per
+window.
 
 ESE free text imports nest under `ESE` by aerodrome, so the taxiway and bay
 labels for each airport sit under their own `ESE/<ICAO>` folder and each one
 has its own toggle.
 
-### Right-click menu items
+**Sidebar actions**
 
-| Item                          | Effect                                                                                   |
-| ----------------------------- | ---------------------------------------------------------------------------------------- |
-| **Altitude filter...**        | Open a modal dialog for the per window altitude filter (min/max in feet, or "No filter") |
-| **Hide aircraft on ground**   | Skip slow targets (under about 40 kt) so taxiing and parked aircraft stop cluttering the view |
-| **Open new Secondary Window** | Spawn another window (up to 5). Starts with all maps hidden.                             |
-| **Load .asr...**              | File picker that applies an EuroScope `.asr` visible map list to this window only        |
-| **Hide maps**                 | Hide every map in this window for a blank slate                                          |
-| **Reload maps**               | Re-read the map file from disk (also re-imports any `SCT_FILE:` entries)                 |
-| **Reload settings**           | Re-read settings and re-import SCT content                                               |
+| Button                      | Effect                                                                                                   |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Hide all** / **Show all** | Hide or show every map in this window at once                                                            |
+| **Load .asr**               | File picker that applies an EuroScope `.asr` visible map list to this window only                        |
+| **Altitude filter...**      | Open a dialog for the per window altitude filter (min/max in feet, or "No filter")                       |
+| **Hide aircraft on ground** | Toggle skipping slow targets (under about 40 kt) so taxiing and parked aircraft stop cluttering the view |
+| **Open new window**         | Spawn another window (up to 5). Starts with all maps hidden.                                             |
+| **Reload maps**             | Re-read the map file from disk (also re-imports any `SCT_FILE:` entries)                                 |
+| **Reload settings**         | Re-read settings and re-import SCT content                                                               |
 
 When the map area is empty (no maps loaded, or every map hidden in this
 window), the window shows a centered hint — **No maps loaded** or
