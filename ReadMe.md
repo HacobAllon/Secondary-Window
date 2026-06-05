@@ -191,7 +191,7 @@ Standard EuroScope sector files can be merged straight into the maps menu
 Add one line per file to **`SecondaryWindowSettings.txt`**:
 
 ```
-SCT_FILE:C:\EuroScope\Sectorfiles\xxxx.sct
+SCT_FILE:xxxx.sct
 ```
 
 **What gets imported?**
