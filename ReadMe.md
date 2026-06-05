@@ -613,7 +613,7 @@ unknown lines without complaining.
 | Drag title bar                     | Move the window                                                                     |
 | Drag bottom-right grip             | Resize                                                                              |
 | Right drag inside map area         | Pan the map view                                                                    |
-| Double click then drag in map area | Draw a measuring ruler that shows distance in NM and bearing at once                |
+| Double click then drag in map area | Draw a measuring ruler with distance in NM and bearing. It stays on screen after you let go, until your next left click dismisses it |
 | Drag an aircraft callsign          | Move that tag's offset relative to its dot (per aircraft, persists for the session) |
 | Mouse wheel                        | Zoom                                                                                |
 | Click the list button in title bar | Open the sidebar to toggle maps and reach every action                              |
