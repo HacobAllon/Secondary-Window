@@ -513,7 +513,6 @@ starting with `//` and blank lines are ignored.
 | Reset to a single default window                           | Delete `SecondaryWindowState.txt`                                             |
 | Force save mid-session (e.g. before EuroScope might crash) | `.sw save`                                                                    |
 | Reset one window without losing the others                 | Remove its `WINDOW` block, or just delete its `HIDE:` lines for "all visible" |
-| Ship a default layout to a teammate                        | Send them your `SecondaryWindowState.txt`                                     |
 
 ---
 
