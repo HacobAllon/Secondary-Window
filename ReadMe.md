@@ -533,6 +533,18 @@ All issued in the EuroScope command bar:
 | `.sw save`                      | Force-save window state now (positions, hidden maps, alt filter)                 |
 | `.sw alt <min> <max>`           | Set the altitude filter on **all** windows. Use feet, e.g. `.sw alt 3000 24000`. |
 | `.sw alt off` / `.sw alt reset` | Reset altitude filter on all windows back to the map file default.               |
+| `.sw update`                    | Check GitHub for a newer release right now (reports result either way)          |
+
+---
+
+Turn the automatic check off with a settings line:
+
+```
+CHECK_FOR_UPDATES:false
+```
+
+`.sw update` checks on demand regardless of that setting, and also tells
+you when you're already up to date.
 
 ---
 
@@ -599,6 +611,7 @@ unknown lines without complaining.
 | `TAG_BG_COLOR`         | `R:G:B`          | `0:0:0`       | Color of the tag background box. Setting this also turns the background on.                                                           |
 | `TAG_BG_PADDING`       | `px`             | `2`           | How far the fill reaches past the text on each side.                                                                                  |
 | `TAG_BACKGROUND_HOVER` | `true` / `false` | `false`       | Show the background only on the tag under the cursor.                                                                                 |
+| `CHECK_FOR_UPDATES`    | `true` / `false` | `true`        | Ask GitHub for the latest release at plugin load and pop up when a newer version exists. `.sw update` works regardless.               |
 | `TAG_LINE`             | format string    | —             | Adds one line to every tag. Repeat for multiple lines. Supports `{placeholder}`. See the *Tag content* section above.                 |
 | `SCT_FILE`             | path             | —             | Imports a `.sct` / `.sct2` sector file. See *Importing `.sct` sector files* for the path resolution rules. Repeat for multiple files. |
 | `SCT_DIR`              | path             | —             | Optional base folder for plain (non absolute, non`\`anchored) `SCT_FILE:` entries. Lets you reference every sector by filename only.  |
