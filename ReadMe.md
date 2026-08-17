@@ -183,6 +183,49 @@ TEXT_SIZE:0      // reset to default
 
 ---
 
+## Raster image layers (charts)
+
+You can display a `.png` / `.jpg` / `.bmp` / `.gif` inside the window as its
+own toggleable layer — handy for VFR/heli charts, aerodrome diagrams or any
+reference image. PDFs aren't read directly; export the page to a PNG first.
+
+Add an `IMAGE:` directive inside a `MAP:` block:
+
+```
+MAP:RPLL TWR VFR Heli Chart
+FOLDER:CHARTS
+ACTIVE:0
+IMAGE:RPLL_TWR_VFR_Heli.png
+```
+
+Drop the image file next to the map file (i.e. next to the DLL). Relative
+paths resolve against the map file's folder; absolute paths work too. Then
+open the sidebar and tick the layer (here under the **CHARTS** folder) to
+show it.
+
+**Two display modes:**
+
+| Mode | How | Behavior |
+| ---- | --- | -------- |
+| **Screen-locked** (default) | just `IMAGE:` | The chart fills the window, aspect preserved, and stays put regardless of pan/zoom — a standalone viewer. Best for schematic charts that aren't geographically accurate (approach plates, heli routes). |
+| **Georeferenced** | add `IMAGE_CORNERS:` | The image's top-left and bottom-right pixels are pinned to real coordinates, so it pans and zooms with the map and overlays the sector. Best for geo-accurate ground layouts. |
+
+```
+IMAGE:RPLL_Ground.png
+IMAGE_CORNERS:N014.31.30.000:E121.00.00.000:N014.29.30.000:E121.02.30.000
+//            ^top-left lat  ^top-left lon   ^bottom-right   ^bottom-right lon
+```
+
+Notes:
+- The image is drawn **beneath** vector shapes, labels and traffic dots, so
+  those stay readable on top.
+- Multiple `IMAGE:` lines can live in one `MAP:` block; each `IMAGE_CORNERS:`
+  applies to the `IMAGE:` directly above it.
+- A screen-locked chart doesn't participate in auto-fit; toggle off other
+  layers to view it on its own.
+
+---
+
 ## Importing `.sct` / `.sct2` sector files
 
 Standard EuroScope sector files can be merged straight into the maps menu
@@ -574,6 +617,8 @@ unknown lines without complaining.
 | `TEXT:`        | `lat:lon:label-text`     | Label at a coord, current color, current size. Label may contain colons.                                                |
 | `TEXT_SIZE:`   | `px`                     | Sticky font size in pixels for following `TEXT:` and ESE labels. `0` = default.                                         |
 | `INCLUDE_ESE:` | `path`                   | Imports labels from a `.ese` files. Path can be relative to the map file or absolute.                                   |
+| `IMAGE:`       | `path`                   | Adds a raster image (PNG/JPG/BMP/GIF) as a layer in the current map. Relative to the map file, or absolute. Screen-locked (fills window) unless `IMAGE_CORNERS:` follows. |
+| `IMAGE_CORNERS:` | `tlLat:tlLon:brLat:brLon` | Georeferences the preceding `IMAGE:` — pins its top-left and bottom-right pixels to those coords so it pans/zooms with the map. |
 | *raw line*     | `lat:lon:category:label` | Inline ESE label. Category becomes its own map under folder `ESE`.                                                      |
 
 ### `SecondaryWindowSettings.txt`
