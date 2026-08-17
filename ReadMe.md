@@ -217,18 +217,11 @@ own layer under the **CHARTS** folder in the sidebar, named after the file
 The folder is configurable with `CHARTS_DIR:` in the settings file (default
 `charts`; set it empty to disable the scan).
 
-**PDFs work too** — drop a `.pdf` in the folder and it's rendered by
-`pdfium.dll` (shipped alongside the plugin). A single-page PDF becomes one
-layer; a **multi-page PDF expands into a subfolder with one layer per page**:
-
-```
-charts/RPLL/approach.pdf   (3 pages)  →  CHARTS ▸ RPLL ▸ approach ▸ Page 1
-                                                                  ▸ Page 2
-                                                                  ▸ Page 3
-```
-
-Keep `pdfium.dll` next to `SecondaryWindow.dll`; if it's missing, PDF charts
-show a note instead. Image formats (PNG/JPG/BMP/GIF) don't need it.
+**PDFs work too** — drop a `.pdf` in the folder and its **first page** is
+rendered by `pdfium.dll` (shipped alongside the plugin) when you show the
+layer. pdfium is never touched while the plugin loads, so a PDF can't affect
+startup. Keep `pdfium.dll` next to `SecondaryWindow.dll`; if it's missing,
+PDF charts show a note instead. Image formats (PNG/JPG/BMP/GIF) don't need it.
 
 **Rotate** a chart from the sidebar: click **Rotate chart 90°** to turn every
 chart visible in that window by 90° (each click adds another 90°). The
