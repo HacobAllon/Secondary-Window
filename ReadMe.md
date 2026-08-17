@@ -9,9 +9,10 @@ A floating popout for EuroScope that draws .sct and .ese polygon maps.
 1. Download the latest `Secondary Window.zip` from the **Releases**
     Inside:
    - `SecondaryWindow.dll`
+   - `pdfium.dll`                  ← only needed for PDF charts; keep it next to the plugin
    - `SecondaryWindowMap.txt`     ← put your map definitions here
    - `SecondaryWindowSettings.txt` ← put your settings here
-2. Drop all three files into the same folder.
+2. Drop the files into the same folder.
 3. In EuroScope: **Other Set → Plugins → Load**, pick `SecondaryWindow.dll`.
 4. A small floating window labeled *Secondary Window* appears above EuroScope.
 
@@ -214,8 +215,12 @@ own layer under the **CHARTS** folder in the sidebar, named after the file
 ```
 
 The folder is configurable with `CHARTS_DIR:` in the settings file (default
-`charts`; set it empty to disable the scan). PDFs in the folder are skipped
-with a note in chat — convert them to PNG/JPG first.
+`charts`; set it empty to disable the scan).
+
+**PDFs work too** — drop a `.pdf` in the folder and its **first page** is
+rendered by `pdfium.dll` (shipped alongside the plugin). Keep `pdfium.dll`
+next to `SecondaryWindow.dll`; if it's missing, PDF charts show a note
+instead. Image formats (PNG/JPG/BMP/GIF) don't need it.
 
 **Rotate** a chart from the sidebar: click **Rotate chart 90°** to turn every
 chart visible in that window by 90° (each click adds another 90°). The
