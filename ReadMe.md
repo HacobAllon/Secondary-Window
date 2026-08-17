@@ -199,17 +199,27 @@ is picked up automatically at load (or after `.sw reload`) and appears as its
 own layer under the **CHARTS** folder in the sidebar, named after the file
 (without extension) and hidden until you tick it. No map-file edits at all.
 
+**Subfolders nest** in the sidebar, so you can group charts by aerodrome:
+
 ```
 …/Secondary Window/
    SecondaryWindow.dll
    charts/
-      RPLL TWR VFR Heli.png     ← becomes layer "RPLL TWR VFR Heli"
-      RPLL Ground.jpg           ← becomes layer "RPLL Ground"
+      RPLL TWR VFR Heli.png        ← CHARTS ▸ RPLL TWR VFR Heli
+      RPLL/
+         cue card.png              ← CHARTS ▸ RPLL ▸ cue card
+         ground.jpg                ← CHARTS ▸ RPLL ▸ ground
+      Another Aerodrome/
+         vac.png                   ← CHARTS ▸ Another Aerodrome ▸ vac
 ```
 
 The folder is configurable with `CHARTS_DIR:` in the settings file (default
 `charts`; set it empty to disable the scan). PDFs in the folder are skipped
 with a note in chat — convert them to PNG/JPG first.
+
+**Rotate** a chart from the sidebar: click **Rotate chart 90°** to turn every
+chart visible in that window by 90° (each click adds another 90°). The
+orientation is per-window and is remembered across restarts.
 
 ### Manual: the `IMAGE:` directive
 
@@ -644,6 +654,7 @@ unknown lines without complaining.
 | `INCLUDE_ESE:` | `path`                   | Imports labels from a `.ese` files. Path can be relative to the map file or absolute.                                   |
 | `IMAGE:`       | `path`                   | Adds a raster image (PNG/JPG/BMP/GIF) as a layer in the current map. Relative to the map file, or absolute. Screen-locked (fills window) unless `IMAGE_CORNERS:` follows. |
 | `IMAGE_CORNERS:` | `tlLat:tlLon:brLat:brLon` | Georeferences the preceding `IMAGE:` — pins its top-left and bottom-right pixels to those coords so it pans/zooms with the map. |
+| `IMAGE_ROTATE:` | `degrees`               | Rotates the preceding `IMAGE:` clockwise about its centre. (Drop-in charts rotate live via the sidebar **Rotate chart 90°** button instead.) |
 | *raw line*     | `lat:lon:category:label` | Inline ESE label. Category becomes its own map under folder `ESE`.                                                      |
 
 ### `SecondaryWindowSettings.txt`
