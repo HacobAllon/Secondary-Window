@@ -217,11 +217,14 @@ own layer under the **CHARTS** folder in the sidebar, named after the file
 The folder is configurable with `CHARTS_DIR:` in the settings file (default
 `charts`; set it empty to disable the scan).
 
-**PDFs work too** — drop a `.pdf` in the folder and its **first page** is
+**PDFs are opt-in.** By default `.pdf` files in the charts folder are ignored,
+because rendering large PDFs through pdfium can be slow or unstable. Set
+`CHARTS_PDF:true` in the settings file to include them — the **first page** is
 rendered by `pdfium.dll` (shipped alongside the plugin) when you show the
-layer. pdfium is never touched while the plugin loads, so a PDF can't affect
-startup. Keep `pdfium.dll` next to `SecondaryWindow.dll`; if it's missing,
-PDF charts show a note instead. Image formats (PNG/JPG/BMP/GIF) don't need it.
+layer. pdfium is never touched while the plugin loads, so it can't affect
+startup, and charts always start hidden (they never auto-render). For a big
+document, converting the page you need to PNG is more reliable than the PDF.
+Image formats (PNG/JPG/BMP/GIF) always work and don't need pdfium.
 
 **Rotate** a chart from the sidebar: click **Rotate chart 90°** to turn every
 chart visible in that window by 90° (each click adds another 90°). The
@@ -700,6 +703,7 @@ unknown lines without complaining.
 | `TAG_BACKGROUND_HOVER` | `true` / `false` | `false`       | Show the background only on the tag under the cursor.                                                                                 |
 | `CHECK_FOR_UPDATES`    | `true` / `false` | `true`        | Ask GitHub for the latest release at plugin load and pop up when a newer version exists. `.sw update` works regardless.               |
 | `CHARTS_DIR`           | path             | `charts`      | Folder (next to the DLL, or absolute) auto-scanned for chart images; each becomes a `CHARTS` layer. Empty disables the scan.          |
+| `CHARTS_PDF`           | `true` / `false` | `false`       | Include `.pdf` files from the charts folder (rendered via pdfium, first page). Off by default; large PDFs can be slow/unstable.        |
 | `TAG_LINE`             | format string    | —             | Adds one line to every tag. Repeat for multiple lines. Supports `{placeholder}`. See the *Tag content* section above.                 |
 | `SCT_FILE`             | path             | —             | Imports a `.sct` / `.sct2` sector file. See *Importing `.sct` sector files* for the path resolution rules. Repeat for multiple files. |
 | `SCT_DIR`              | path             | —             | Optional base folder for plain (non absolute, non`\`anchored) `SCT_FILE:` entries. Lets you reference every sector by filename only.  |
