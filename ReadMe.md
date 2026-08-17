@@ -189,7 +189,32 @@ You can display a `.png` / `.jpg` / `.bmp` / `.gif` inside the window as its
 own toggleable layer — handy for VFR/heli charts, aerodrome diagrams or any
 reference image. PDFs aren't read directly; export the page to a PNG first.
 
-Add an `IMAGE:` directive inside a `MAP:` block:
+Once a chart is shown, **zoom it with the mouse wheel and pan it by
+right-dragging**, exactly like the map.
+
+### Easiest: the drop-in `charts` folder
+
+Just drop image files into the **`charts`** folder next to the DLL. Each one
+is picked up automatically at load (or after `.sw reload`) and appears as its
+own layer under the **CHARTS** folder in the sidebar, named after the file
+(without extension) and hidden until you tick it. No map-file edits at all.
+
+```
+…/Secondary Window/
+   SecondaryWindow.dll
+   charts/
+      RPLL TWR VFR Heli.png     ← becomes layer "RPLL TWR VFR Heli"
+      RPLL Ground.jpg           ← becomes layer "RPLL Ground"
+```
+
+The folder is configurable with `CHARTS_DIR:` in the settings file (default
+`charts`; set it empty to disable the scan). PDFs in the folder are skipped
+with a note in chat — convert them to PNG/JPG first.
+
+### Manual: the `IMAGE:` directive
+
+For finer control (e.g. georeferencing), add an `IMAGE:` directive inside a
+`MAP:` block:
 
 ```
 MAP:RPLL TWR VFR Heli Chart
@@ -657,6 +682,7 @@ unknown lines without complaining.
 | `TAG_BG_PADDING`       | `px`             | `2`           | How far the fill reaches past the text on each side.                                                                                  |
 | `TAG_BACKGROUND_HOVER` | `true` / `false` | `false`       | Show the background only on the tag under the cursor.                                                                                 |
 | `CHECK_FOR_UPDATES`    | `true` / `false` | `true`        | Ask GitHub for the latest release at plugin load and pop up when a newer version exists. `.sw update` works regardless.               |
+| `CHARTS_DIR`           | path             | `charts`      | Folder (next to the DLL, or absolute) auto-scanned for chart images; each becomes a `CHARTS` layer. Empty disables the scan.          |
 | `TAG_LINE`             | format string    | —             | Adds one line to every tag. Repeat for multiple lines. Supports `{placeholder}`. See the *Tag content* section above.                 |
 | `SCT_FILE`             | path             | —             | Imports a `.sct` / `.sct2` sector file. See *Importing `.sct` sector files* for the path resolution rules. Repeat for multiple files. |
 | `SCT_DIR`              | path             | —             | Optional base folder for plain (non absolute, non`\`anchored) `SCT_FILE:` entries. Lets you reference every sector by filename only.  |
