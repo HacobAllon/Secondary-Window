@@ -745,7 +745,7 @@ has its own toggle.
 
 | Button                      | Effect                                                                                                   |
 | --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **Hide all** / **Show all** | Hide or show every map in this window at once                                                            |
+| **Hide all** / **Show all** | Hide or show every map in this window at once. **Show all** leaves hidden chart layers hidden — tick those individually. |
 | **Load .asr**               | File picker that applies an EuroScope `.asr` visible map list to this window only                        |
 | **Altitude filter...**      | Open a dialog for the per window altitude filter (min/max in feet, or "No filter")                       |
 | **Hide aircraft on ground** | Toggle skipping slow targets (under about 40 kt) so taxiing and parked aircraft stop cluttering the view |
